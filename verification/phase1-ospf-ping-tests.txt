@@ -26,3 +26,14 @@ Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 4.4.4.4, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 40/72/92 ms
+
+
+======================================================================
+ROUTER: R2
+COMMAND: ping 3.3.3.3 source loopback 0
+======================================================================
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 3.3.3.3, timeout is 2 seconds:
+Packet sent with a source address of 2.2.2.2 
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 64/87/100 ms
