@@ -16,6 +16,7 @@ COMMAND: show ip ospf interface brief
 Interface    PID   Area            IP Address/Mask    Cost  State Nbrs F/C
 Lo10         1     1               172.16.1.1/24      1     LOOP  0/0
 Lo11         1     1               172.16.2.1/24      1     LOOP  0/0
+Lo0          1     1               2.2.2.2/24         1     LOOP  0/0
 Gi1/0        1     1               192.168.100.1/24   1     DR    0/0
 Gi0/0        1     1               10.0.0.2/30        1     BDR   1/1
 
@@ -27,13 +28,14 @@ show ip ospf interface brief
 Interface    PID   Area            IP Address/Mask    Cost  State Nbrs F/C
 Lo10         1     2               172.17.1.1/24      1     LOOP  0/0
 Lo11         1     2               172.17.2.1/24      1     LOOP  0/0
+Lo0          1     2               3.3.3.3/32         1     LOOP  0/0
 Gi0/0        1     2               10.0.0.6/30        1     BDR   1/1
-
 
 ========================================================================
 ROUTER: R-ASBR
 COMMAND: show ip ospf interface brief 
 ========================================================================
 Interface    PID   Area            IP Address/Mask    Cost  State Nbrs F/C
+Lo0          1     0               4.4.4.4/32         1     LOOP  0/0
 Gi0/0        1     0               10.0.0.10/30       1     BDR   1/1
 
