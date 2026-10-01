@@ -1,0 +1,18 @@
+R1-Core#show ip ospf database summary | include 172
+  Link State ID: 172.16.0.0 (summary Network Number)
+  Link State ID: 172.17.0.0 (summary Network Number)
+  Link State ID: 172.17.0.0 (summary Network Number)
+  Link State ID: 172.16.0.0 (summary Network Number)
+
+
+R2#show ip ospf database summary | include 172
+  Link State ID: 172.17.0.0 (summary Network Number)
+
+
+R3#show ip ospf database summary | include 172
+  Link State ID: 172.16.0.0 (summary Network Number)
+
+
+R-ASBR#show ip  ospf database summary | include 172
+  Link State ID: 172.16.0.0 (summary Network Number)
+  Link State ID: 172.17.0.0 (summary Network Number)
