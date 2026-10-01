@@ -8,7 +8,6 @@ Sending 5, 100-byte ICMP Echos to 1.1.1.1, timeout is 2 seconds:
 Success rate is 100 percent (5/5), round-trip min/avg/max = 28/33/40 ms
 
 
-
 =====================================================================
 ROUTER: R2
 COMMAND: ping 3.3.3.3
