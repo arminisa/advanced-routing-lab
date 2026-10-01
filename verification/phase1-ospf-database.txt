@@ -1,0 +1,29 @@
+========================================================================
+ROUTER: R1-Core
+COMMAND: show ip ospf database summary | include 172
+========================================================================
+  Link State ID: 172.16.0.0 (summary Network Number)
+  Link State ID: 172.17.0.0 (summary Network Number)
+  Link State ID: 172.17.0.0 (summary Network Number)
+  Link State ID: 172.16.0.0 (summary Network Number)
+
+
+========================================================================
+ROUTER: R2
+COMMAND: show ip ospf database summary | include 172
+========================================================================
+  Link State ID: 172.17.0.0 (summary Network Number)
+
+
+========================================================================
+ROUTER: R3
+COMMAND: show ip ospf database summary | include 172
+========================================================================
+  Link State ID: 172.16.0.0 (summary Network Number)
+
+========================================================================
+ROUTER: R-ASBR 
+COMMAND: show ip  ospf database summary | include 172
+========================================================================  
+Link State ID: 172.16.0.0 (summary Network Number)
+  Link State ID: 172.17.0.0 (summary Network Number)
