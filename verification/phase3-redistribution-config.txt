@@ -1,0 +1,26 @@
+========================================
+ROUTER: R-ASBR
+COMMAND: show run | section ospf
+========================================
+redistribute ospf 1 metric 10000 100 255 1 1500
+router ospf 1
+ router-id 4.4.4.4
+ redistribute eigrp 10 metric 100 metric-type 1 subnets
+ passive-interface Loopback0
+ network 4.4.4.4 0.0.0.0 area 0
+ network 10.0.0.8 0.0.0.3 area 0
+
+
+========================================
+ROUTER: R-ASBR
+COMMAND: router eigrp 10
+ ========================================
+ network 4.4.4.4 0.0.0.0
+ network 10.0.0.12 0.0.0.3
+ network 10.0.0.16 0.0.0.3
+ redistribute ospf 1 metric 10000 100 255 1 1500
+ passive-interface Loopback0
+ passive-interface GigabitEthernet0/0
+
+
+
