@@ -1,0 +1,22 @@
+======================================================================
+ROUTER: E1
+COMMAND: show ip eigrp topology 
+======================================================================
+EIGRP-IPv4 Topology Table for AS(10)/ID(10.0.1.1)
+Codes: P - Passive, A - Active, U - Update, Q - Query, R - Reply,
+       r - reply Status, s - sia Status 
+
+P 10.0.0.12/30, 1 successors, FD is 2816
+        via Connected, GigabitEthernet0/0
+P 192.168.200.0/24, 1 successors, FD is 2816
+        via Connected, GigabitEthernet1/0
+P 10.0.1.0/30, 1 successors, FD is 2816
+        via Connected, GigabitEthernet2/0
+P 5.5.5.5/32, 1 successors, FD is 128256
+        via Connected, Loopback0
+P 6.6.6.6/32, 1 successors, FD is 130816
+        via 10.0.1.2 (130816/128256), GigabitEthernet2/0
+P 10.0.0.16/30, 2 successors, FD is 3072
+        via 10.0.0.13 (3072/2816), GigabitEthernet0/0
+        via 10.0.1.2 (3072/2816), GigabitEthernet2/0
+
