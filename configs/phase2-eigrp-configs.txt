@@ -26,5 +26,8 @@ ROUTETR: R-ASBR
 COMMAND: show running-config | section eigrp   
 ==============================================================================
 router eigrp 10
+ network 4.4.4.4 0.0.0.0
  network 10.0.0.12 0.0.0.3
  network 10.0.0.16 0.0.0.3
+ passive-interface Loopback0
+ passive-interface GigabitEthernet0/0
