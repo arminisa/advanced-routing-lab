@@ -21,3 +21,55 @@ P 10.0.0.16/30, 2 successors, FD is 3072, serno 21
         via 10.0.0.13 (3072/2816), GigabitEthernet0/0
         via 10.0.1.2 (3072/2816), GigabitEthernet2/0
 
+======================================================================
+ROUTER: E2
+COMMAND: show ip eigrp topology all-links
+======================================================================
+IGRP-IPv4 Topology Table for AS(10)/ID(6.6.6.6)
+Codes: P - Passive, A - Active, U - Update, Q - Query, R - Reply,
+       r - reply Status, s - sia Status 
+
+P 10.0.0.12/30, 2 successors, FD is 3072, serno 21
+        via 10.0.0.17 (3072/2816), GigabitEthernet0/0
+        via 10.0.1.1 (3072/2816), GigabitEthernet1/0
+P 192.168.200.0/24, 1 successors, FD is 3072, serno 22
+        via 10.0.1.1 (3072/2816), GigabitEthernet1/0
+        via 10.0.0.17 (3328/3072), GigabitEthernet0/0
+P 10.0.1.0/30, 1 successors, FD is 2816, serno 15
+        via Connected, GigabitEthernet1/0
+P 5.5.5.5/32, 1 successors, FD is 130816, serno 17
+        via 10.0.1.1 (130816/128256), GigabitEthernet1/0
+        via 10.0.0.17 (131072/130816), GigabitEthernet0/0
+P 6.6.6.6/32, 1 successors, FD is 128256, serno 19
+        via Connected, Loopback0
+P 10.0.0.16/30, 1 successors, FD is 2816, serno 10
+        via Connected, GigabitEthernet0/0
+
+
+======================================================================
+ROUTER: R-ASBR
+COMMAND: show ip eigrp topology all-links
+======================================================================
+EIGRP-IPv4 Topology Table for AS(10)/ID(4.4.4.4)
+Codes: P - Passive, A - Active, U - Update, Q - Query, R - Reply,
+       r - reply Status, s - sia Status 
+
+P 10.0.0.12/30, 1 successors, FD is 2816, serno 1
+        via Connected, GigabitEthernet1/0
+P 192.168.200.0/24, 1 successors, FD is 3072, serno 26
+        via 10.0.0.14 (3072/2816), GigabitEthernet1/0
+        via 10.0.0.18 (3328/3072), GigabitEthernet2/0
+P 10.0.1.0/30, 2 successors, FD is 3072, serno 24
+        via 10.0.0.14 (3072/2816), GigabitEthernet1/0
+        via 10.0.0.18 (3072/2816), GigabitEthernet2/0
+P 5.5.5.5/32, 1 successors, FD is 130816, serno 22
+        via 10.0.0.14 (130816/128256), GigabitEthernet1/0
+        via 10.0.0.18 (131072/130816), GigabitEthernet2/0
+P 6.6.6.6/32, 1 successors, FD is 130816, serno 25
+        via 10.0.0.18 (130816/128256), GigabitEthernet2/0
+        via 10.0.0.14 (131072/130816), GigabitEthernet1/0
+P 10.0.0.16/30, 1 successors, FD is 2816, serno 5
+        via Connected, GigabitEthernet2/0
+
+
+
