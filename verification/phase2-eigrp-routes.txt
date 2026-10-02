@@ -1,0 +1,35 @@
+==============================================================================
+ROUTETR: E1
+COMMAND: show ip route eigrp  | begin net     
+==============================================================================
+6.0.0.0/32 is subnetted, 1 subnets
+D        6.6.6.6 [90/130816] via 10.0.1.2, 01:18:53, GigabitEthernet2/0
+      10.0.0.0/8 is variably subnetted, 5 subnets, 2 masks
+D        10.0.0.16/30 [90/3072] via 10.0.1.2, 01:18:57, GigabitEthernet2/0
+                      [90/3072] via 10.0.0.13, 01:18:57, GigabitEthernet0/0
+
+
+==============================================================================
+ROUTETR: E2
+COMMAND: show ip route eigrp  | begin net     
+==============================================================================  
+5.0.0.0/32 is subnetted, 1 subnets
+D        5.5.5.5 [90/130816] via 10.0.1.1, 01:19:55, GigabitEthernet1/0
+      10.0.0.0/8 is variably subnetted, 5 subnets, 2 masks
+D        10.0.0.12/30 [90/3072] via 10.0.1.1, 01:19:55, GigabitEthernet1/0
+                      [90/3072] via 10.0.0.17, 01:19:55, GigabitEthernet0/0
+D     192.168.200.0/24 [90/3072] via 10.0.1.1, 01:18:26, GigabitEthernet1/0
+
+
+==============================================================================
+ROUTETR: R-ASBR
+COMMAND: show ip route eigrp  | begin net     
+==============================================================================   
+5.0.0.0/32 is subnetted, 1 subnets
+D        5.5.5.5 [90/130816] via 10.0.0.14, 01:20:36, GigabitEthernet1/0
+      6.0.0.0/32 is subnetted, 1 subnets
+D        6.6.6.6 [90/130816] via 10.0.0.18, 01:20:36, GigabitEthernet2/0
+      10.0.0.0/8 is variably subnetted, 9 subnets, 2 masks
+D        10.0.1.0/30 [90/3072] via 10.0.0.18, 01:20:36, GigabitEthernet2/0
+                     [90/3072] via 10.0.0.14, 01:20:36, GigabitEthernet1/0
+D     192.168.200.0/24 [90/3072] via 10.0.0.14, 01:19:07, GigabitEthernet1/0
