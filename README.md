@@ -78,7 +78,7 @@ This project is a comprehensive CCNP-level routing lab where the following conce
 ## ✅ Progress
 
 - [x] **Phase 1: OSPF Multi-Area + Summarization**
-- [ ] Phase 2: EIGRP + DUAL + Variance
+- [x] Phase 2: EIGRP + DUAL + Variance
 - [ ] Phase 3: Route Redistribution (OSPF ↔ EIGRP)
 - [ ] Phase 4: Route Filtering (Prefix-list + Route-map)
 
@@ -115,6 +115,39 @@ This project is a comprehensive CCNP-level routing lab where the following conce
 - **Lesson Learned:** In OSPF, every interface must be **explicitly** advertised using the `network` command — unlike EIGRP which uses class-based advertisement.
 
 ---
+
+
+## 📊 Phase 2: EIGRP + DUAL
+
+### 🔧 Configuration Highlights
+
+- Enabled EIGRP AS 10 on R-ASBR, E1, E2
+- Added secondary link between E1 and E2 (`10.0.1.0/30`)
+- Disabled `auto-summary` on all EIGRP routers
+- Advertised Loopbacks and LAN subnets (`192.168.200.0/24`)
+- Configured `passive-interface` on Loopback and LAN-facing interfaces
+
+### ✅ Verification Results
+
+- ✅ 2 EIGRP neighbors on each router (R-ASBR, E1, E2)
+- ✅ DUAL Topology Table analyzed with `all-links`
+- ✅ ECMP active on `10.0.0.16/30` and `10.0.0.12/30`
+- ✅ `192.168.200.0/24` propagated from E1 to E2
+
+### 🐛 Issues Encountered & Solutions
+
+**Issue #1: Wrong IP on E2's Gi1/0**
+- **Problem:** Pings between E1 and E2 took the indirect path via R-ASBR
+- **Root Cause:** IP `10.0.0.2/30` mistakenly configured on E2's Gi1/0 (conflict with R2)
+- **Solution:** Corrected to `10.0.1.2/30`
+- **Lesson Learned:** Always verify subnet consistency between directly-connected interfaces.
+
+**Issue #2: `192.168.200.0/24` not advertised**
+- **Problem:** E2 couldn't learn E1's LAN subnet
+- **Root Cause:** Gi1/0 on E1 had no IP configured
+- **Solution:** Assigned `192.168.200.1/24` to Gi1/0
+- **Lesson Learned:** EIGRP `network` only advertises interfaces that are up with an assigned IP.
+
 
 ## 📂 Repository Structure
 
