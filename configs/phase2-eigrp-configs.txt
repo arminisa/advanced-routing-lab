@@ -1,0 +1,30 @@
+==============================================================================
+ROUTETR: E1
+COMMAND: show running-config | section eigrp   
+==============================================================================
+router eigrp 10
+ network 5.5.5.5 0.0.0.0
+ network 10.0.0.12 0.0.0.3
+ network 10.0.1.0 0.0.0.3
+ network 192.168.200.0
+ passive-interface Loopback0
+ passive-interface GigabitEthernet1/0
+
+ 
+==============================================================================
+ROUTETR: E2
+COMMAND: show running-config | section eigrp   
+==============================================================================
+ router eigrp 10
+ network 6.6.6.6 0.0.0.0
+ network 10.0.0.16 0.0.0.3
+ network 10.0.1.0 0.0.0.3
+ passive-interface Loopback0
+
+==============================================================================
+ROUTETR: R-ASBR
+COMMAND: show running-config | section eigrp   
+==============================================================================
+router eigrp 10
+ network 10.0.0.12 0.0.0.3
+ network 10.0.0.16 0.0.0.3
