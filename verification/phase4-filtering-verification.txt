@@ -1,0 +1,38 @@
+========================================
+ROUTER: R-ASBR
+COMMAND: show ip prefix-list Filter-172.17
+========================================
+ip prefix-list Filter-172.17: 1 entries
+   seq 5 permit 172.17.0.0/22
+
+
+========================================
+ROUTER: R-ASBR
+COMMAND: show route-map rm-ospf-to-eigrp
+========================================
+route-map rm-ospf-to-eigrp, deny, sequence 10
+  Match clauses:
+    ip address prefix-lists: Filter-172.17
+route-map rm-ospf-to-eigrp, permit, sequence 20
+
+
+========================================
+ROUTER: E1
+COMMAND: show ip route eigrp | include 172.17
+========================================
+(empty — filtered)
+
+
+========================================
+ROUTER: E1
+COMMAND: show ip route eigrp | include 172
+========================================
+172.16.0.0/22 is subnetted, 1 subnets
+D EX    172.16.0.0 [170/281856] via 10.0.0.13
+
+
+========================================
+ROUTER: R2
+COMMAND: show ip route ospf | include 172.17
+========================================
+O IA  172.17.0.0/22 [110/2] via 10.0.0.1
