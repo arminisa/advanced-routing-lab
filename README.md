@@ -327,17 +327,25 @@ PC1> ping 192.168.200.10
 advanced-routing-lab/
 ├── README.md
 ├── topology/
-│   └── topology.png                    # GNS3 topology screenshot
-├── verification/                        # Command output verification
+│   └── topology.png
+├── verification/
 │   ├── phase1-ospf-neighbors.txt
 │   ├── phase1-ospf-interface.txt
 │   ├── phase1-ospf-database.txt
 │   ├── phase1-ospf-summarization.txt
-│   └── phase1-ospf-ping-tests.txt
-└── configs/                             # (Coming soon — final router configs)
+│   ├── phase1-ospf-ping-tests.txt
+│   ├── phase2-eigrp-neighbors.txt
+│   ├── phase2-eigrp-topology.txt
+│   ├── phase2-eigrp-routes.txt
+│   ├── phase3-redistribution-configs.txt
+│   ├── phase3-redistribution-routes.txt
+│   ├── phase3-ping-tests.txt
+│   ├── phase4-filtering-configs.txt
+│   └── phase4-filtering-verification.txt
+└── configs/
+    ├── phase2-eigrp-configs.txt
+    └── (final router configs — coming soon)
 ```
-
----
 
 ## 🛠️ Environment
 
