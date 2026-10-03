@@ -6,7 +6,7 @@ Implementation of advanced routing in an Enterprise topology including OSPF Mult
 
 ---
 
-## 📋 Overview
+## 📋 Overview 
 
 This project is a comprehensive CCNP-level routing lab where the following concepts are implemented hands-on:
 
