@@ -79,8 +79,8 @@ This project is a comprehensive CCNP-level routing lab where the following conce
 
 - [x] **Phase 1: OSPF Multi-Area + Summarization**
 - [x] Phase 2: EIGRP + DUAL + Variance
-- [ ] Phase 3: Route Redistribution (OSPF ↔ EIGRP)
-- [ ] Phase 4: Route Filtering (Prefix-list + Route-map)
+- [x] Phase 3: Route Redistribution (OSPF ↔ EIGRP)
+- [x] Phase 4: Route Filtering (Prefix-list + Route-map)
 
 ---
 
@@ -139,7 +139,130 @@ This project is a comprehensive CCNP-level routing lab where the following conce
 **Issue #1: Wrong IP on E2's Gi1/0**
 - **Problem:** Pings between E1 and E2 took the indirect path via R-ASBR
 - **Root Cause:** IP `10.0.0.2/30` mistakenly configured on E2's Gi1/0 (conflict with R2)
-- **Solution:** Corrected to `10.0.1.2/30`
+- **## 📊 Phase 3: Route Redistribution (OSPF ↔ EIGRP)
+
+### 🎯 Goal
+
+Bridge the two routing domains (OSPF and EIGRP) so that routes from each domain become visible in the other, enabling end-to-end connectivity between PC1 (OSPF side) and PC2 (EIGRP side).
+
+### 🔧 Configuration Highlights
+
+**R-ASBR** acts as the **ASBR (Autonomous System Boundary Router)** — the meeting point between OSPF and EIGRP.
+
+#### Redistribution EIGRP → OSPF
+
+Configured inside `router ospf 1`:
+
+```
+router ospf 1
+ router-id 4.4.4.4
+ redistribute eigrp 10 subnets metric-type 1 metric 100
+ passive-interface Loopback0
+ network 4.4.4.4 0.0.0.0 area 0
+ network 10.0.0.8 0.0.0.3 area 0
+```
+
+| Keyword | Purpose |
+|---------|---------|
+| `redistribute eigrp 10` | Import routes from EIGRP AS 10 |
+| `subnets` | **Critical** — includes subnetted routes (`/30`, `/32`) |
+| `metric-type 1` | E1 = Seed metric + internal OSPF cost (dynamic) |
+| `metric 100` | Seed metric for external routes |
+
+#### Redistribution OSPF → EIGRP
+
+Configured inside `router eigrp 10`:
+
+```
+router eigrp 10
+ network 4.4.4.4 0.0.0.0
+ network 10.0.0.12 0.0.0.3
+ network 10.0.0.16 0.0.0.3
+ redistribute ospf 1 metric 10000 100 255 1 1500
+ passive-interface Loopback0
+ passive-interface GigabitEthernet0/0
+```
+
+| Parameter | Value | Meaning |
+|-----------|:-----:|---------|
+| Bandwidth | `10000` | Kbps |
+| Delay | `100` | Tens of microseconds |
+| Reliability | `255` | 100% |
+| Load | `1` | Minimum load |
+| MTU | `1500` | Bytes |
+
+> ⚠️ **Note:** All 5 metric parameters are mandatory for EIGRP redistribution. Without them, routes are treated with infinite metric and never installed.
+
+### ✅ Verification Results
+
+#### On R2 (OSPF side) — EIGRP routes appear as `O E1`:
+
+```
+O E1  5.5.5.5/32        [110/102] via 10.0.0.1
+O E1  6.6.6.6/32        [110/102] via 10.0.0.1
+O E1  10.0.0.12/30      [110/102] via 10.0.0.1
+O E1  10.0.0.16/30      [110/102] via 10.0.0.1
+O E1  10.0.1.0/30       [110/102] via 10.0.0.1
+O E1  192.168.200.0/24  [110/102] via 10.0.0.1
+```
+
+**Metric calculation confirmed:** `Seed (100) + Internal OSPF (2) = 102` → `metric-type 1` working correctly ✅
+
+#### On E1/E2 (EIGRP side) — OSPF routes appear as `D EX`:
+
+```
+D EX  1.1.1.1/32        [170/281856] via 10.0.0.13
+D EX  2.2.2.2/32        [170/281856] via 10.0.0.13
+D EX  3.3.3.3/32        [170/281856] via 10.0.0.13
+D EX  10.0.0.0/30       [170/281856] via 10.0.0.13
+D EX  10.0.0.4/30       [170/281856] via 10.0.0.13
+D EX  10.0.0.8/30       [170/281856] via 10.0.0.13
+D EX  172.16.0.0/22     [170/281856] via 10.0.0.13
+D EX  172.17.0.0/22     [170/281856] via 10.0.0.13
+D EX  192.168.100.0/24  [170/281856] via 10.0.0.13
+```
+
+**Administrative Distance confirmed:** External EIGRP routes have AD = `170` (vs. internal = `90`) ✅
+
+#### End-to-End Connectivity 🎉
+
+```
+PC1> ping 192.168.200.10
+84 bytes from 192.168.200.10 icmp_seq=1 ttl=60 time=251.037 ms
+84 bytes from 192.168.200.10 icmp_seq=2 ttl=60 time=189.277 ms
+84 bytes from 192.168.200.10 icmp_seq=3 ttl=60 time=139.511 ms
+84 bytes from 192.168.200.10 icmp_seq=4 ttl=60 time=198.125 ms
+84 bytes from 192.168.200.10 icmp_seq=5 ttl=60 time=168.369 ms
+```
+
+**Full bidirectional connectivity across the OSPF/EIGRP boundary!** ✅
+
+### 🧠 Key Concepts Learned
+
+| Concept | Description |
+|---------|-------------|
+| **Seed Metric** | Artificial metric assigned to redistributed routes so the destination protocol can understand them |
+| **`subnets` keyword** | Required for OSPF redistribution — without it, only classful routes are advertised |
+| **E1 vs E2** | E1 = Seed + internal OSPF cost (dynamic); E2 = Seed only (Cisco default) |
+| **Route Preference** | Internal EIGRP (AD 90) wins over External EIGRP (AD 170) |
+| **Direction Rule** | Redistribution command goes inside the **destination** protocol |
+
+### 🐛 Issues Encountered & Solutions
+
+**Issue #1: All External Routes Share the Same Metric**
+
+- **Observation:** Every redistributed OSPF route into EIGRP showed the identical metric `281856`
+- **Reason:** Redistribution assigns the same Seed Metric (`10000 100 255 1 1500`) to all routes
+- **Impact:** EIGRP cannot differentiate between closer and farther external networks based on metric alone
+- **Solution (Phase 4):** Use a Route-map to assign varying metrics per prefix
+- **Lesson:** Seed Metric is a one-size-fits-all value; granular control requires Route-maps
+
+**Issue #2: `subnets` Keyword Not Visible in `show run`**
+
+- **Observation:** After `redistribute eigrp 10 subnets metric-type 1 metric 100`, the `subnets` keyword didn't appear in `show running-config`
+- **Reason:** Some IOS versions treat `subnets` as default behavior in this context
+- **Verification:** Confirmed working by checking that `/30` and `/32` routes appear as `O E1`
+- **Lesson:** Trust the routing table, not just the config outputSolution:** Corrected to `10.0.1.2/30`
 - **Lesson Learned:** Always verify subnet consistency between directly-connected interfaces.
 
 **Issue #2: `192.168.200.0/24` not advertised**
@@ -148,6 +271,55 @@ This project is a comprehensive CCNP-level routing lab where the following conce
 - **Solution:** Assigned `192.168.200.1/24` to Gi1/0
 - **Lesson Learned:** EIGRP `network` only advertises interfaces that are up with an assigned IP.
 
+
+
+
+
+## 📊 Phase 4: Route Filtering
+
+### 🔧 Configuration Highlights
+
+- Created **Prefix-list** `Filter-172.17` to match `172.17.0.0/22`
+- Created **Route-map** `RM-OSPF-TO-EIGRP` with two sequences:
+  - `seq 10 deny`: Matches Prefix-list → Denies
+  - `seq 20 permit`: Catches all remaining routes
+- Applied Route-map on EIGRP Redistribution: `redistribute ospf 1 metric 10000 100 255 1 1500 route-map RM-OSPF-TO-EIGRP`
+
+### ✅ Verification Results
+
+- ✅ `172.17.0.0/22` **no longer appears** in E1/E2 routing tables
+- ✅ `172.16.0.0/22` and other routes still propagate normally
+- ✅ **R2 still sees `172.17.0.0/22`** (filter only applies to OSPF→EIGRP)
+- ✅ E2E connectivity intact
+
+### 🧠 Key Concepts Learned
+
+- **Prefix-list inside Route-map:** `permit` = "match", `deny` = "no match"
+  (counterintuitive, but this is how IOS interprets it!)
+- **Deleting Prefix-list entries:** Must use `no ip prefix-list <NAME> seq <N>`
+  (without `permit`/`deny`/network)
+- **Implicit Deny in Prefix-list:** Last entry is always deny
+- **Route-map Sequence:** Lower sequence number = checked first
+- **Direction of Redistribution:** Command inside the **destination** protocol
+
+### 🐛 Issues Encountered & Solutions
+
+**Issue #1: Applied Route-map to wrong direction**
+- **Problem:** Filter wasn't working; `172.17.0.0/22` still visible on E1
+- **Root Cause:** Route-map was applied to `router ospf 1` (EIGRP→OSPF) instead of `router eigrp 10` (OSPF→EIGRP)
+- **Solution:** Moved Route-map to `router eigrp 10`
+- **Lesson:** Redistribution command goes inside the **destination** protocol
+
+**Issue #2: Prefix-list `deny` instead of `permit`**
+- **Problem:** Filter wasn't matching correctly
+- **Root Cause:** In Route-map context, Prefix-list `deny` means "no match"
+- **Solution:** Changed prefix-list to `permit 172.17.0.0/22`
+- **Lesson:** Match criteria in Route-map follows permit/deny interpretation
+
+**Issue #3: Removing individual Prefix-list entries**
+- **Problem:** `no ip prefix-list <name> seq 8 permit ...` failed
+- **Solution:** Use only `no ip prefix-list <name> seq <N>` (without keywords)
+- **Lesson:** IOS matches entries by sequence number only
 
 ## 📂 Repository Structure
 
