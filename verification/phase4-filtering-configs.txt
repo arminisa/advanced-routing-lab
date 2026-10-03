@@ -1,0 +1,24 @@
+ROUTER: R-ASBR
+COMMAND: show run | section ip prefix-list
+========================================
+ip prefix-list Filter-172.17 seq 5 permit 172.17.0.0/22
+
+ROUTER: R-ASBR
+COMMAND: show run | section route-map
+========================================
+redistribute ospf 1 metric 10000 100 255 1 1500 route-map rm-ospf-to-eigrp
+route-map rm-ospf-to-eigrp deny 10
+ match ip address prefix-list Filter-172.17
+route-map rm-ospf-to-eigrp permit 20
+
+
+ROUTER: R-ASBR
+COMMAND: show run | section router eigrp
+========================================
+router eigrp 10
+ network 4.4.4.4 0.0.0.0
+ network 10.0.0.12 0.0.0.3
+ network 10.0.0.16 0.0.0.3
+ redistribute ospf 1 metric 10000 100 255 1 1500 route-map rm-ospf-to-eigrp
+ passive-interface Loopback0
+ passive-interface GigabitEthernet0/0
