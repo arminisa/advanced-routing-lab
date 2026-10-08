@@ -1,0 +1,64 @@
+================================================================
+PHASE 5 - BGP - 06: ATTRIBUTES PRIORITY (WEIGHT vs LOCAL PREF)
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+SCENARIO
+----------------------------------------------------------------
+Link 1 (10.0.100.2): Weight = 200, Local Pref = 100
+Link 2 (10.0.101.2): Weight = 0,   Local Pref = 200
+
+Question: Which link wins?
+
+----------------------------------------------------------------
+CONFIGURATION - R1-Core
+----------------------------------------------------------------
+
+router bgp 65001
+ neighbor 10.0.100.2 weight 200
+ neighbor 10.0.101.2 route-map SET-LP in
+
+! (SET-LP sets localpref 200 on 9.9.9.9)
+
+----------------------------------------------------------------
+COMMAND USED
+----------------------------------------------------------------
+
+R1-Core# clear ip bgp * soft
+
+----------------------------------------------------------------
+VERIFICATION
+----------------------------------------------------------------
+
+R1-Core# show ip bgp 9.9.9.9
+
+BGP routing table entry for 9.9.9.9/32
+Paths: (2 available, best #2, table default)
+
+  65002
+    10.0.101.2 from 10.0.101.2 (9.9.9.9)
+      Origin IGP, metric 0, localpref 200, valid, external
+
+  65002
+    10.0.100.2 from 10.0.100.2 (9.9.9.9)
+      Origin IGP, metric 0, localpref 100, weight 200, valid, external, best
+
+----------------------------------------------------------------
+RESULT
+----------------------------------------------------------------
+✅ Link 1 (10.0.100.2) wins
+✅ Even though Link 2 has higher Local Pref (200 > 100)
+✅ Because Weight = 200 and Weight is checked FIRST
+
+----------------------------------------------------------------
+LESSON LEARNED
+----------------------------------------------------------------
+BGP Best Path Selection Order:
+  1. Weight              <-- checked FIRST
+  2. Local Preference    <-- checked second
+
+If higher-priority attribute differs, lower-priority attributes are IGNORED.
+Weight (priority 1) beats Local Pref (priority 2).
+================================================================
