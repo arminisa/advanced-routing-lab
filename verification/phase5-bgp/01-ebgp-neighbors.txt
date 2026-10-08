@@ -1,0 +1,62 @@
+================================================================
+PHASE 5 - BGP - 01: eBGP NEIGHBOR SETUP
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+AS: R1-Core (65001) ↔ R-ISP (65002)
+
+----------------------------------------------------------------
+CONFIGURATION - R1-Core
+----------------------------------------------------------------
+
+router bgp 65001
+ bgp router-id 1.1.1.1
+ neighbor 10.0.100.2 remote-as 65002
+ neighbor 10.0.100.2 description === R-ISP ===
+
+----------------------------------------------------------------
+CONFIGURATION - R-ISP
+----------------------------------------------------------------
+
+router bgp 65002
+ bgp router-id 9.9.9.9
+ neighbor 10.0.100.1 remote-as 65001
+ neighbor 10.0.100.1 description === R1-Core ===
+
+----------------------------------------------------------------
+VERIFICATION - R1-Core
+----------------------------------------------------------------
+
+R1-Core# show ip bgp summary
+BGP router identifier 1.1.1.1, local AS number 65001
+BGP table version is 1, main routing table version 1
+
+Neighbor        V    AS MsgRcvd MsgSent  TblVer  InQ OutQ Up/Down  State/PfxRcd
+10.0.100.2      4 65002      12      12       1    0    0 00:07:56        0
+
+KEY INDICATORS:
+- local AS 65001                         ✅
+- Neighbor AS 65002                      ✅
+- State/PfxRcd = 0                       ✅ ESTABLISHED
+
+----------------------------------------------------------------
+VERIFICATION - R-ISP
+----------------------------------------------------------------
+
+R-ISP# show ip bgp summary
+BGP router identifier 9.9.9.9, local AS number 65002
+
+Neighbor        V    AS MsgRcvd MsgSent  TblVer  InQ OutQ Up/Down  State/PfxRcd
+10.0.100.1      4 65001      12      12       1    0    0 00:07:56        0
+
+KEY INDICATORS:
+- local AS 65002                         ✅
+- Neighbor AS 65001                      ✅
+- State/PfxRcd = 0                       ✅ ESTABLISHED
+
+----------------------------------------------------------------
+RESULT
+----------------------------------------------------------------
+✅ eBGP session between AS 65001 and AS 65002 is UP
+✅ Both routers see each other as eBGP peers
+================================================================

@@ -1,0 +1,72 @@
+================================================================
+PHASE 5 - BGP - 04: REDISTRIBUTION (BGP → OSPF)
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+CONFIGURATION - R1-Core
+----------------------------------------------------------------
+
+router ospf 1
+ redistribute bgp 65001 subnets
+ network 10.0.100.0 0.0.0.3 area 0
+
+----------------------------------------------------------------
+KEY CONFIG NOTES
+----------------------------------------------------------------
+
+1. "subnets" keyword is MANDATORY:
+   - Without it: only classful networks (/8, /16, /24)
+   - With it: ALL subnets including /30, /32 pass through
+   - Loopback ISP (9.9.9.9/32) needs this to be redistributed
+
+2. Link to R-ISP (10.0.100.0/30) must be in OSPF:
+   - Without this: R2 has no return path to 10.0.100.2
+   - Result: traceroute works but ping fails (asymmetric routing)
+   - R1-Core itself has "C" (connected) route, but R2 doesn't
+
+----------------------------------------------------------------
+VERIFICATION - R1-Core OSPF Database
+----------------------------------------------------------------
+
+R1-Core# show ip ospf database external
+
+            OSPF Router with ID (1.1.1.1) (Process ID 1)
+                Type-5 AS External Link States
+
+  LS age: 15
+  LS Type: AS External Link
+  Link State ID: 9.9.9.9 (External Network Number)
+  Advertising Router: 1.1.1.1
+
+KEY INDICATORS:
+- Type-5 LSA generated                                   ✅
+- Advertising Router = 1.1.1.1 (R1-Core)                  ✅
+
+----------------------------------------------------------------
+VERIFICATION - R2 Routing Table
+----------------------------------------------------------------
+
+R2# show ip route 9.9.9.9
+Routing entry for 9.9.9.9/32
+  Known via "ospf 1", distance 110, metric 20, type extern 2
+  Last update from 10.0.0.1 on GigabitEthernet0/0
+
+R2# show ip route 10.0.100.0
+Routing entry for 10.0.100.0/30
+  Known via "ospf 1", distance 110, metric 2, type intra area
+  Last update from 10.0.0.1 on GigabitEthernet0/0
+
+KEY INDICATORS:
+- 9.9.9.9/32: Type "E2" (External Type 2)                    ✅
+- 10.0.100.0/30: Type "intra area"                          ✅
+- Both learned from 10.0.0.1 (R1-Core)                      ✅
+
+----------------------------------------------------------------
+RESULT
+----------------------------------------------------------------
+✅ BGP routes injected into OSPF domain (Type-5 LSA)
+✅ R2 has return path to R-ISP (10.0.100.0/30)
+✅ R2 can reach ISP Loopback (9.9.9.9)
+================================================================

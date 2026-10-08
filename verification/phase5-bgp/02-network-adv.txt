@@ -1,0 +1,82 @@
+================================================================
+PHASE 5 - BGP - 02: NETWORK ADVERTISEMENT
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+CONFIGURATION
+----------------------------------------------------------------
+
+R1-Core (AS 65001):
+ router bgp 65001
+  network 1.1.1.1 mask 255.255.255.255
+
+R-ISP (AS 65002):
+ router bgp 65002
+  network 9.9.9.9 mask 255.255.255.255
+
+----------------------------------------------------------------
+KEY NOTES
+----------------------------------------------------------------
+
+BGP "network" command is DIFFERENT from OSPF/EIGRP:
+- OSPF/EIGRP: "network" activates interfaces for the protocol
+- BGP: "network" advertises an EXISTING route from RIB
+
+CONDITION:
+The prefix must already exist in the routing table (as connected,
+static, or IGP route). Otherwise it won't be advertised.
+
+----------------------------------------------------------------
+VERIFICATION - R1-Core BGP Table
+----------------------------------------------------------------
+
+R1-Core# show ip bgp
+BGP table version is 3, local router ID is 1.1.1.1
+
+   Network          Next Hop            Metric LocPrf Weight Path
+*> 1.1.1.1/32       0.0.0.0                  0         32768 i
+*> 9.9.9.9/32       10.0.100.2               0             0 65002 i
+
+KEY INDICATORS:
+- 1.1.1.1/32: Origin "i", Weight 32768 = locally originated  ✅
+- 9.9.9.9/32: AS-Path 65002, learned from R-ISP               ✅
+
+----------------------------------------------------------------
+VERIFICATION - R-ISP BGP Table
+----------------------------------------------------------------
+
+R-ISP# show ip bgp
+
+   Network          Next Hop            Metric LocPrf Weight Path
+*> 1.1.1.1/32       10.0.100.1               0             0 65001 i
+*> 9.9.9.9/32       0.0.0.0                  0         32768 i
+
+----------------------------------------------------------------
+VERIFICATION - R1-Core Routing Table
+----------------------------------------------------------------
+
+R1-Core# show ip route bgp
+B 9.9.9.9/32 [20/0] via 10.0.100.2, 00:01:23
+
+KEY INDICATORS:
+- AD = 20 (eBGP)                                             ✅
+- Route installed in RIB                                     ✅
+
+----------------------------------------------------------------
+PING TEST
+----------------------------------------------------------------
+
+R1-Core# ping 9.9.9.9 source 1.1.1.1
+!!!!!
+Success rate is 100 percent (5/5)
+
+----------------------------------------------------------------
+RESULT
+----------------------------------------------------------------
+✅ R1-Core advertises 1.1.1.1/32 to R-ISP via BGP
+✅ R-ISP advertises 9.9.9.9/32 to R1-Core via BGP
+✅ BGP routes installed in RIB with AD=20
+✅ End-to-end reachability confirmed
+================================================================

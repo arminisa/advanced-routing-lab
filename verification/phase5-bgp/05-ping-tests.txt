@@ -1,0 +1,61 @@
+================================================================
+PHASE 5 - BGP - 05: END-TO-END PING TESTS
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+TEST 1: R-ISP → PC1 (192.168.100.10) - OSPF Area 1 Network
+----------------------------------------------------------------
+
+R-ISP# ping 192.168.100.10
+!!!!!
+Success rate is 100 percent (5/5)
+
+Path: R-ISP → R1-Core → R2 → PC1
+
+----------------------------------------------------------------
+TEST 2: R-ISP → PC2 (192.168.200.10) - EIGRP AS 10 Network
+----------------------------------------------------------------
+
+R-ISP# ping 192.168.200.10
+!!!!!
+Success rate is 100 percent (5/5)
+
+Path: R-ISP → R1-Core → R-ASBR → E1 → PC2
+
+----------------------------------------------------------------
+TEST 3: R2 → R-ISP Loopback (9.9.9.9)
+----------------------------------------------------------------
+
+R2# ping 9.9.9.9 source 2.2.2.2
+!!!!!
+Success rate is 100 percent (5/5)
+
+Path: R2 → R1-Core → R-ISP
+
+----------------------------------------------------------------
+TEST 4: Traceroute from R-ISP to PC2
+----------------------------------------------------------------
+
+R-ISP# traceroute 192.168.200.10
+  1 10.0.100.1 68 msec 32 msec 28 msec
+  2 10.0.0.10 [AS 65001] 64 msec 84 msec 40 msec
+  3 192.168.200.10 [AS 65001] 124 msec 92 msec 96 msec
+
+PATH ANALYSIS:
+- Hop 1: R1-Core (eBGP + OSPF boundary)
+- Hop 2: R-ASBR (OSPF + EIGRP boundary)
+- Hop 3: PC2 (EIGRP network)
+
+----------------------------------------------------------------
+RESULT
+----------------------------------------------------------------
+✅ All ping tests PASSED (100% success rate)
+✅ Bidirectional reachability confirmed across all domains:
+   - eBGP: AS 65001 ↔ AS 65002
+   - OSPF: Area 0, 1, 2
+   - EIGRP: AS 10
+✅ Traceroute proves multi-protocol end-to-end path
+✅ Phase 5 BGP Redistribution: COMPLETE
+================================================================

@@ -1,0 +1,77 @@
+================================================================
+PHASE 5 - BGP - 03: REDISTRIBUTION (OSPF → BGP)
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+CONFIGURATION - R1-Core
+----------------------------------------------------------------
+
+router bgp 65001
+ redistribute ospf 1 match internal external 1 external 2
+
+----------------------------------------------------------------
+KEY CONFIG NOTES
+----------------------------------------------------------------
+
+Command breakdown:
+- "internal"      : Intra-area (O) and Inter-area (O IA) routes
+- "external 1"    : OSPF E1 routes
+- "external 2"    : OSPF E2 routes
+
+WHY ALL THREE?
+EIGRP-derived routes (from R-ASBR) come into OSPF as E1/E2.
+Without "external 1 external 2", these routes would NOT be
+redistributed into BGP → R-ISP can't reach EIGRP networks.
+
+----------------------------------------------------------------
+VERIFICATION - R1-Core BGP Table
+----------------------------------------------------------------
+
+R1-Core# show ip bgp
+
+   Network          Next Hop            Metric LocPrf Weight Path
+*> 1.1.1.1/32       0.0.0.0                  0         32768 i
+*> 2.2.2.2/32       0.0.0.0                  2         32768 ?
+*> 3.3.3.3/32       0.0.0.0                  2         32768 ?
+*> 4.4.4.4/32       0.0.0.0                  2         32768 ?
+*> 5.5.5.5/32       0.0.0.0                101         32768 ?
+*> 6.6.6.6/32       0.0.0.0                101         32768 ?
+*> 9.9.9.9/32       10.0.100.2               0             0 65002 i
+*> 10.0.0.12/30     10.0.0.10              101         32768 ?
+*> 10.0.0.16/30     10.0.0.10              101         32768 ?
+*> 10.0.1.0/30      10.0.0.10              101         32768 ?
+*> 172.16.0.0/22    0.0.0.0                  2         32768 ?
+*> 172.17.0.0/22    0.0.0.0                  2         32768 ?
+*> 192.168.100.0/24 10.0.0.2                 2         32768 ?
+
+KEY INDICATORS:
+- Origin "i" = from "network" command                        ✅
+- Origin "?" = from Redistribution (Incomplete)              ✅
+- Weight 32768 = locally originated                         ✅
+
+----------------------------------------------------------------
+VERIFICATION - R-ISP BGP Table
+----------------------------------------------------------------
+
+R-ISP# show ip route bgp
+B 2.2.2.2/32 [20/0] via 10.0.100.1
+B 3.3.3.3/32 [20/0] via 10.0.100.1
+B 5.5.5.5/32 [20/0] via 10.0.100.1
+B 6.6.6.6/32 [20/0] via 10.0.100.1
+B 192.168.100.0/24 [20/0] via 10.0.100.1
+B 192.168.200.0/24 [20/0] via 10.0.100.1
+
+KEY INDICATORS:
+- AD = 20 (eBGP)                                             ✅
+- All internal networks learned                              ✅
+- EIGRP-derived network (192.168.200.0) visible              ✅
+
+----------------------------------------------------------------
+RESULT
+----------------------------------------------------------------
+✅ All OSPF routes (internal + E1 + E2) injected into BGP
+✅ R-ISP can now reach ALL internal networks
+✅ EIGRP-derived networks also visible via OSPF path
+================================================================
