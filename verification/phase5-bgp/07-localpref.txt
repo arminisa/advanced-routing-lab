@@ -1,0 +1,49 @@
+================================================================
+PHASE 5 - BGP - 07: LOCAL PREFERENCE
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+SCENARIO
+----------------------------------------------------------------
+Force outbound traffic to prefer Link 2 using Local Pref.
+(After removing Weight from Link 2)
+
+----------------------------------------------------------------
+CONFIGURATION - R1-Core
+----------------------------------------------------------------
+
+ip prefix-list MATCH-9 seq 5 permit 9.9.9.9/32
+
+route-map SET-LP permit 10
+ match ip address prefix-list MATCH-9
+ set local-preference 200
+route-map SET-LP permit 20
+
+router bgp 65001
+ neighbor 10.0.101.2 route-map SET-LP in
+
+----------------------------------------------------------------
+VERIFICATION
+----------------------------------------------------------------
+
+R1-Core# show ip bgp 9.9.9.9
+
+  65002
+    10.0.101.2 from 10.0.101.2 (9.9.9.9)
+      Origin IGP, metric 0, localpref 200, valid, external, best
+  65002
+    10.0.100.2 from 10.0.100.2 (9.9.9.9)
+      Origin IGP, metric 0, localpref 100, valid, external
+
+RESULT:
+✅ Link 2 wins because Local Pref = 200 > 100
+
+LESSON:
+- Local Pref is standard
+- Higher = Better
+- Advertised to iBGP peers only
+- Default: 100
+- Direction: IN (received routes)
+================================================================

@@ -1,0 +1,58 @@
+================================================================
+PHASE 5 - BGP - 08: PRIORITY (WEIGHT vs LOCAL PREF)
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+SCENARIO
+----------------------------------------------------------------
+Link 1 (10.0.100.2): Weight = 200, Local Pref = 100
+Link 2 (10.0.101.2): Weight = 0,   Local Pref = 200
+
+Question: Which link wins?
+
+----------------------------------------------------------------
+CONFIGURATION - R1-Core
+----------------------------------------------------------------
+
+! Local Pref (from previous test) still active on Link 2:
+neighbor 10.0.101.2 route-map SET-LP in
+
+! Add Weight on Link 1:
+router bgp 65001
+ neighbor 10.0.100.2 weight 200
+
+----------------------------------------------------------------
+COMMAND USED
+----------------------------------------------------------------
+
+R1-Core# clear ip bgp * soft
+
+----------------------------------------------------------------
+VERIFICATION
+----------------------------------------------------------------
+
+R1-Core# show ip bgp 9.9.9.9
+
+Paths: (2 available, best #2, table default)
+
+  65002
+    10.0.101.2 from 10.0.101.2 (9.9.9.9)
+      Origin IGP, metric 0, localpref 200, valid, external
+  65002
+    10.0.100.2 from 10.0.100.2 (9.9.9.9)
+      Origin IGP, metric 0, localpref 100, weight 200, valid, external, best
+
+RESULT:
+✅ Link 1 wins (Weight=200)
+❌ Even though Link 2 has higher Local Pref (200 > 100)
+
+LESSON (CRITICAL):
+BGP Best Path Selection Order:
+  1. Weight              <-- checked FIRST
+  2. Local Preference    <-- checked second
+
+If higher-priority attribute differs, lower-priority attributes 
+are IGNORED. Weight beats Local Pref.
+================================================================

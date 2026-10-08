@@ -1,0 +1,40 @@
+================================================================
+PHASE 5 - BGP - 06: WEIGHT
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+SCENARIO
+----------------------------------------------------------------
+Force outbound traffic (R1-Core -> R-ISP) to prefer Link 2.
+
+----------------------------------------------------------------
+CONFIGURATION - R1-Core
+----------------------------------------------------------------
+
+router bgp 65001
+ neighbor 10.0.101.2 weight 200
+
+----------------------------------------------------------------
+VERIFICATION
+----------------------------------------------------------------
+
+R1-Core# show ip bgp 9.9.9.9
+
+  65002
+    10.0.101.2 from 10.0.101.2 (9.9.9.9)
+      Origin IGP, metric 0, localpref 100, weight 200, valid, external, best
+  65002
+    10.0.100.2 from 10.0.100.2 (9.9.9.9)
+      Origin IGP, metric 0, localpref 100, valid, external
+
+RESULT:
+✅ Link 2 wins because Weight=200 > 0
+
+LESSON:
+- Weight is Cisco-only
+- Higher = Better
+- Local to router only
+- Default: 0 (received) / 32768 (local)
+================================================================
