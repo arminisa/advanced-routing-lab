@@ -1,0 +1,91 @@
+================================================================
+PHASE 5 - BGP - 07: SELECTIVE ADVERTISEMENT (3-LINK)
+================================================================
+Project: advanced-routing-lab
+Date: 2026-10-08
+
+----------------------------------------------------------------
+SCENARIO
+----------------------------------------------------------------
+
+3 links between R1-Core (AS 65001) and R-ISP (AS 65002):
+- Link 1: 10.0.100.1 <-> 10.0.100.2
+- Link 2: 10.0.101.1 <-> 10.0.101.2
+- Link 3: 10.0.102.1 <-> 10.0.102.2
+
+GOAL:
+- 192.168.100.0/24 -> ONLY via Link 1
+- 192.168.200.0/24 -> ONLY via Link 2
+- Everything else -> via Link 3
+
+----------------------------------------------------------------
+CONFIGURATION - R1-Core
+----------------------------------------------------------------
+
+! Prefix-lists
+ip prefix-list PL-192-100 seq 5 permit 192.168.100.0/24
+ip prefix-list PL-192-200 seq 5 permit 192.168.200.0/24
+
+! Route-map for Link 1 (ONLY 192.168.100.0)
+route-map RM-ADV-LINK1 permit 10
+ match ip address prefix-list PL-192-100
+
+! Route-map for Link 2 (ONLY 192.168.200.0)
+route-map RM-ADV-LINK2 permit 10
+ match ip address prefix-list PL-192-200
+
+! Route-map for Link 3 (Everything EXCEPT above)
+route-map RM-ADV-LINK3 deny 10
+ match ip address prefix-list PL-192-100
+route-map RM-ADV-LINK3 deny 20
+ match ip address prefix-list PL-192-200
+route-map RM-ADV-LINK3 permit 30
+
+! Apply to neighbors (out direction)
+router bgp 65001
+ neighbor 10.0.100.2 route-map RM-ADV-LINK1 out
+ neighbor 10.0.101.2 route-map RM-ADV-LINK2 out
+ neighbor 10.0.102.2 route-map RM-ADV-LINK3 out
+
+----------------------------------------------------------------
+VERIFICATION - R-ISP
+----------------------------------------------------------------
+
+R-ISP# show ip bgp 192.168.100.0
+Paths: (1 available, best #1, table default)
+  65001
+    10.0.100.1 from 10.0.100.1 (1.1.1.1)
+      Origin incomplete, metric 2, localpref 100, valid, external, best
+
+R-ISP# show ip bgp 192.168.200.0
+Paths: (1 available, best #1, table default)
+  65001
+    10.0.101.1 from 10.0.101.1 (1.1.1.1)
+      Origin incomplete, metric 101, localpref 100, valid, external, best
+
+R-ISP# show ip bgp 5.5.5.5
+Paths: (1 available, best #1, table default)
+  65001
+    10.0.102.1 from 10.0.102.1 (1.1.1.1)
+      Origin incomplete, metric 101, localpref 100, valid, external, best
+
+----------------------------------------------------------------
+RESULT
+----------------------------------------------------------------
+✅ 192.168.100.0/24 advertised ONLY via Link 1
+✅ 192.168.200.0/24 advertised ONLY via Link 2
+✅ All other prefixes (e.g., 5.5.5.5) advertised via Link 3
+✅ Selective Advertisement successfully implemented
+
+----------------------------------------------------------------
+LESSON LEARNED
+----------------------------------------------------------------
+1. Route-map WITHOUT "permit X" at the end = Implicit Deny
+   -> All unmatched prefixes will be dropped!
+2. In RM-ADV-LINK1 and RM-ADV-LINK2, we only need "permit 10".
+   -> All other prefixes are implicitly denied (desired behavior).
+3. In RM-ADV-LINK3, we need explicit "deny 10/20" for the two
+   specific prefixes and "permit 30" for everything else.
+4. Trade-off: No redundancy. If a link goes down, that prefix
+   is unreachable.
+================================================================
